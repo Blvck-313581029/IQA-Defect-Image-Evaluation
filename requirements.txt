@@ -1,0 +1,10 @@
+opencv-python
+numpy
+pandas
+scipy
+Pillow
+torch
+pyiqa
+libsvm-official
+openpyxl
+PyYAML

@@ -1,0 +1,21 @@
+input:
+  path: "/content/aircraft1_missing_head_001.jpg"
+
+output:
+  dir: "./outputs"
+
+assets:
+  niqe_param_path: "./assets/niqe_pris_params.npz"
+  brisque_model_path: "./assets/allmodel"
+
+thresholds:
+  MUSIQ: 23.0
+  NIQE: 8.2
+  BRISQUE: 64.0
+  Laplacian_variance: 20.0
+
+weights:
+  MUSIQ: 0.25
+  NIQE: 0.25
+  BRISQUE: 0.25
+  Laplacian_variance: 0.25
