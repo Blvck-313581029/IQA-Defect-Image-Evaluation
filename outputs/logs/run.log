@@ -1,0 +1,24 @@
+[2026-05-15 22:39:42,973] [INFO] Log file saved to: ./outputs\logs\run.log
+[2026-05-15 22:39:42,973] [INFO] Loading IQA metrics...
+[2026-05-15 22:39:45,488] [INFO] All IQA metrics loaded.
+[2026-05-15 22:40:21,151] [INFO] Log file saved to: ./outputs\logs\run.log
+[2026-05-15 22:40:21,151] [INFO] Loading IQA metrics...
+[2026-05-15 22:40:21,841] [INFO] All IQA metrics loaded.
+[2026-05-15 22:40:21,841] [INFO] Processing: blur_images\blur_1\aircraft1_missing_head_001.jpg
+[2026-05-15 22:51:16,427] [INFO] Log file saved to: ./outputs\logs\run.log
+[2026-05-15 22:51:16,427] [INFO] Loading IQA metrics...
+[2026-05-15 22:51:17,199] [INFO] All IQA metrics loaded.
+[2026-05-15 22:51:17,199] [INFO] Processing: blur_images\blur_1\aircraft1_missing_head_001.jpg
+[2026-05-15 22:53:17,364] [INFO] Log file saved to: ./outputs\logs\run.log
+[2026-05-15 22:53:17,365] [INFO] Loading IQA metrics...
+[2026-05-15 22:53:18,062] [INFO] All IQA metrics loaded.
+[2026-05-15 22:53:18,063] [INFO] Processing: blur_images\blur_1\aircraft1_missing_head_001.jpg
+[2026-05-15 22:53:18,723] [INFO] Image: aircraft1_missing_head_001.jpg
+[2026-05-15 22:53:18,723] [INFO]   MUSIQ               : 27.5327, pass=True
+[2026-05-15 22:53:18,726] [INFO]   NIQE                : 7.5104, pass=True
+[2026-05-15 22:53:18,726] [INFO]   BRISQUE             : 70.2770, pass=False
+[2026-05-15 22:53:18,727] [INFO]   Laplacian Variance  : 24.2029, pass=True
+[2026-05-15 22:53:18,728] [INFO]   Final Score         : 97.7671
+[2026-05-15 22:53:18,729] [INFO]   Final Pass          : False
+[2026-05-15 22:53:19,050] [INFO] CSV saved to : ./outputs\iqa_results.csv
+[2026-05-15 22:53:19,050] [INFO] XLSX saved to: ./outputs\iqa_results.xlsx
