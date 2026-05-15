@@ -1,19 +1,20 @@
 # IQA Defect Image Evaluation
 
-This repository provides an image quality evaluation pipeline for defect images.
+本專案是一個用於**瑕疵影像品質評估**的工具。
 
-The goal of this project is to evaluate whether an input image passes basic image quality requirements using multiple no-reference image quality metrics. The current version supports four metrics:
+主要目標是針對輸入影像，透過多個 no-reference image quality assessment 指標，判斷該影像是否符合基本品質需求。目前支援四個指標：
 
 1. MUSIQ
 2. NIQE
 3. BRISQUE
 4. Laplacian Variance
 
-The program supports both single-image input and folder input. It prints the pass/fail result of each metric in the terminal, while detailed metric values are saved into log, CSV, and Excel files.
+本程式支援單張圖片輸入，也支援整個資料夾批次輸入。  
+執行時，terminal 會輸出每個指標的 pass / fail 結果，而詳細的分數資訊會另外存成 log、CSV 與 Excel 檔案。
 
 ---
 
-## Repository Structure
+## 專案架構
 
 ```bash
 iqa-defect-evaluation/
@@ -52,34 +53,34 @@ iqa-defect-evaluation/
 
 ---
 
-## Features
+## 功能特色
 
-- Evaluate image quality using four metrics.
-- Support both single image and folder input.
-- Configure input path, output path, thresholds, and weights through `config.yaml`.
-- Print concise pass/fail results in the terminal.
-- Save detailed metric values into a log file.
-- Export final results to CSV and Excel files.
-- Keep metric implementations separated for easier maintenance.
+- 使用四個影像品質指標進行評估。
+- 支援單張影像與資料夾批次輸入。
+- 可透過 `config.yaml` 設定輸入路徑、輸出路徑、threshold 與權重。
+- terminal 只輸出簡潔的 pass / fail 結果。
+- 詳細的 metric 數值會存入 log 檔。
+- 評估結果會輸出成 CSV 與 Excel。
+- 各個 metric 的實作分開管理，方便後續維護與修改。
 
 ---
 
-## Installation
+## 安裝方式
 
-Create a Python environment:
+建議先建立一個 Python 環境：
 
 ```bash
 conda create -n iqa_env python=3.10
 conda activate iqa_env
 ```
 
-Install the required packages:
+安裝所需套件：
 
 ```bash
 pip install -r requirements.txt
 ```
 
-The `requirements.txt` file should contain:
+`requirements.txt` 內容如下：
 
 ```txt
 opencv-python
@@ -96,20 +97,20 @@ PyYAML
 
 ---
 
-## Download Required Assets
+## 下載必要模型檔案
 
-This project requires two external model files:
+本專案需要兩個外部模型檔案：
 
 1. NIQE pristine natural image model parameters
 2. BRISQUE pretrained SVR model
 
-Download them by running:
+可以透過以下指令下載：
 
 ```bash
 python download_assets.py
 ```
 
-After downloading, the assets should be placed under:
+下載後，檔案會放在：
 
 ```bash
 assets/
@@ -117,15 +118,15 @@ assets/
 └── allmodel
 ```
 
-These files are required by NIQE and BRISQUE.
+這兩個檔案分別會被 NIQE 和 BRISQUE 使用。
 
 ---
 
-## Configuration
+## 設定檔說明
 
-Most settings are controlled by `config.yaml`.
+大部分參數都可以在 `config.yaml` 裡面修改。
 
-Example:
+範例：
 
 ```yaml
 input:
@@ -151,29 +152,29 @@ weights:
   Laplacian_variance: 0.25
 ```
 
-### Config Field Description
+### Config 欄位說明
 
-| Field | Description |
+| 欄位 | 說明 |
 |---|---|
-| `input.path` | Path to a single image or an image folder |
-| `output.dir` | Directory used to save CSV, Excel, and log files |
-| `assets.niqe_param_path` | Path to NIQE pristine natural image model parameters |
-| `assets.brisque_model_path` | Path to BRISQUE pretrained SVR model |
-| `thresholds` | Pass/fail threshold of each metric |
-| `weights` | Weights used to calculate the final overview score |
+| `input.path` | 輸入影像路徑，可以是單張圖片或資料夾 |
+| `output.dir` | 輸出資料夾，用來存放 CSV、Excel 和 log |
+| `assets.niqe_param_path` | NIQE pristine natural image model 參數路徑 |
+| `assets.brisque_model_path` | BRISQUE pretrained SVR model 路徑 |
+| `thresholds` | 每個 metric 的 pass / fail 門檻值 |
+| `weights` | 計算 final score 時使用的權重 |
 
 ---
 
-## Supported Metrics
+## 支援的評估指標
 
 ### 1. MUSIQ
 
-MUSIQ is a learned no-reference image quality assessment metric.
+MUSIQ 是一種 learning-based 的 no-reference image quality assessment 指標。
 
-In this project, MUSIQ is loaded through the `pyiqa` package.
+本專案中，MUSIQ 透過 `pyiqa` 套件載入。
 
-- Higher score means better image quality.
-- The image passes MUSIQ if the score is greater than or equal to the MUSIQ threshold.
+- 分數越高通常代表影像品質越好。
+- 當 MUSIQ 分數大於或等於設定的 threshold 時，代表通過。
 
 ```text
 MUSIQ_pass = MUSIQ >= MUSIQ_threshold
@@ -183,12 +184,12 @@ MUSIQ_pass = MUSIQ >= MUSIQ_threshold
 
 ### 2. NIQE
 
-NIQE is a no-reference image quality metric based on natural scene statistics.
+NIQE 是一種基於 natural scene statistics 的 no-reference image quality assessment 指標。
 
-It does not require a distorted reference image. Instead, it compares the statistical features of the input image with a pristine natural image model.
+它不需要 reference image，而是將輸入影像的統計特徵與 pristine natural image model 進行比較。
 
-- Lower score means better image quality.
-- The image passes NIQE if the score is less than or equal to the NIQE threshold.
+- 分數越低通常代表影像品質越好。
+- 當 NIQE 分數小於或等於設定的 threshold 時，代表通過。
 
 ```text
 NIQE_pass = NIQE <= NIQE_threshold
@@ -198,12 +199,12 @@ NIQE_pass = NIQE <= NIQE_threshold
 
 ### 3. BRISQUE
 
-BRISQUE is also a no-reference image quality metric based on natural scene statistics.
+BRISQUE 也是一種基於 natural scene statistics 的 no-reference image quality assessment 指標。
 
-It extracts NSS features from the image and sends them into a pretrained SVR model to predict an image quality score.
+它會從影像中抽取 NSS features，然後丟入 pretrained SVR model 預測影像品質分數。
 
-- Lower score means better image quality.
-- The image passes BRISQUE if the score is less than or equal to the BRISQUE threshold.
+- 分數越低通常代表影像品質越好。
+- 當 BRISQUE 分數小於或等於設定的 threshold 時，代表通過。
 
 ```text
 BRISQUE_pass = BRISQUE <= BRISQUE_threshold
@@ -213,13 +214,13 @@ BRISQUE_pass = BRISQUE <= BRISQUE_threshold
 
 ### 4. Laplacian Variance
 
-Laplacian Variance is used to estimate image sharpness.
+Laplacian Variance 主要用來估計影像的清晰程度。
 
-It applies the Laplacian operator to the grayscale image and calculates the variance of the response.
+它會先將影像轉成灰階，接著使用 Laplacian operator 偵測影像中的邊緣變化，最後計算 response 的 variance。
 
-- Higher score usually means the image is sharper.
-- Lower score usually means the image is blurrier.
-- The image passes Laplacian Variance if the score is greater than or equal to the Laplacian threshold.
+- 分數越高通常代表影像越清楚。
+- 分數越低通常代表影像越模糊。
+- 當 Laplacian Variance 大於或等於設定的 threshold 時，代表通過。
 
 ```text
 Laplacian_pass = Laplacian_variance >= Laplacian_variance_threshold
@@ -227,38 +228,38 @@ Laplacian_pass = Laplacian_variance >= Laplacian_variance_threshold
 
 ---
 
-## Metric Direction
+## 指標方向整理
 
-| Metric | Better Direction | Pass Rule |
+| 指標 | 越高越好 / 越低越好 | Pass 判斷方式 |
 |---|---|---|
-| MUSIQ | Higher is better | `MUSIQ >= threshold` |
-| NIQE | Lower is better | `NIQE <= threshold` |
-| BRISQUE | Lower is better | `BRISQUE <= threshold` |
-| Laplacian Variance | Higher is better | `Laplacian_variance >= threshold` |
+| MUSIQ | 越高越好 | `MUSIQ >= threshold` |
+| NIQE | 越低越好 | `NIQE <= threshold` |
+| BRISQUE | 越低越好 | `BRISQUE <= threshold` |
+| Laplacian Variance | 越高越好 | `Laplacian_variance >= threshold` |
 
 ---
 
-## Run the Program
+## 執行方式
 
-### Run with the default config
+### 使用預設 config 執行
 
 ```bash
 python main.py --config config.yaml
 ```
 
-### Run on a single image
+### 評估單張影像
 
 ```bash
 python main.py --config config.yaml --input_path ./data/test.jpg
 ```
 
-### Run on an image folder
+### 評估整個資料夾
 
 ```bash
 python main.py --config config.yaml --input_path ./data/images
 ```
 
-### Change output directory
+### 指定輸出資料夾
 
 ```bash
 python main.py --config config.yaml --output_dir ./my_outputs
@@ -266,9 +267,9 @@ python main.py --config config.yaml --output_dir ./my_outputs
 
 ---
 
-## Output Files
+## 輸出檔案
 
-After evaluation, the results will be saved in the output directory.
+執行完成後，結果會儲存在 output 資料夾中。
 
 ```bash
 outputs/
@@ -280,34 +281,34 @@ outputs/
 
 ---
 
-## CSV and Excel Output
+## CSV 與 Excel 輸出內容
 
-The CSV and Excel files contain one row for each image.
+CSV 和 Excel 會針對每張圖片輸出一列結果。
 
-Example columns:
+欄位範例如下：
 
-| Column | Description |
+| 欄位 | 說明 |
 |---|---|
-| `image_name` | Image file name |
-| `MUSIQ` | MUSIQ score |
-| `NIQE` | NIQE score |
-| `BRISQUE` | BRISQUE score |
-| `Laplacian_variance` | Laplacian Variance score |
-| `MUSIQ_pass` | Whether MUSIQ passes |
-| `NIQE_pass` | Whether NIQE passes |
-| `BRISQUE_pass` | Whether BRISQUE passes |
-| `Laplacian_pass` | Whether Laplacian Variance passes |
-| `final_score` | Weighted overview score |
-| `final_pass` | Whether all four metrics pass |
-| `image_path` | Original image path |
+| `image_name` | 影像檔名 |
+| `MUSIQ` | MUSIQ 分數 |
+| `NIQE` | NIQE 分數 |
+| `BRISQUE` | BRISQUE 分數 |
+| `Laplacian_variance` | Laplacian Variance 分數 |
+| `MUSIQ_pass` | MUSIQ 是否通過 |
+| `NIQE_pass` | NIQE 是否通過 |
+| `BRISQUE_pass` | BRISQUE 是否通過 |
+| `Laplacian_pass` | Laplacian Variance 是否通過 |
+| `final_score` | 加權後的總覽分數 |
+| `final_pass` | 四個指標是否全部通過 |
+| `image_path` | 原始影像路徑 |
 
 ---
 
-## Terminal Output
+## Terminal 輸出
 
-The terminal output only shows a concise pass/fail summary.
+Terminal 只會顯示簡潔的 pass / fail 結果。
 
-Example:
+範例：
 
 ```text
 ================ IQA Summary ================
@@ -323,15 +324,16 @@ Detailed information has been saved to log file.
 =============================================
 ```
 
-The terminal output is intentionally kept simple. Detailed scores are stored in the log file and output tables.
+Terminal 輸出刻意保持簡潔。  
+詳細分數會存放在 log 檔、CSV 和 Excel 裡面。
 
 ---
 
-## Log Output
+## Log 輸出
 
-The log file stores detailed metric information.
+Log 檔會記錄更詳細的 metric 結果，方便後續檢查與追蹤。
 
-Example:
+範例：
 
 ```text
 [2026-05-15 12:00:00] [INFO] Processing: ./data/test.jpg
@@ -346,9 +348,9 @@ Example:
 
 ---
 
-## Final Pass Rule
+## Final Pass 判斷方式
 
-Each metric has its own threshold.
+每個 metric 都有自己的 threshold。
 
 ```text
 MUSIQ_pass              = MUSIQ >= MUSIQ_threshold
@@ -357,7 +359,7 @@ BRISQUE_pass            = BRISQUE <= BRISQUE_threshold
 Laplacian_pass          = Laplacian_variance >= Laplacian_variance_threshold
 ```
 
-The final pass result is calculated as:
+最後的 `final_pass` 會這樣計算：
 
 ```text
 final_pass = MUSIQ_pass
@@ -366,17 +368,17 @@ final_pass = MUSIQ_pass
              and Laplacian_pass
 ```
 
-Therefore, an image passes only when all four metrics pass.
+也就是說，只有當四個指標都通過時，該影像才會被判定為通過。
 
 ---
 
 ## Final Score
 
-The `final_score` is a weighted overview score from 0 to 100.
+`final_score` 是一個 0 到 100 的加權總覽分數。
 
-It is used as an additional reference, but it does not replace `final_pass`.
+它主要是提供一個整體品質參考，但不會取代 `final_pass`。
 
-The default weights are:
+預設權重如下：
 
 ```yaml
 weights:
@@ -386,7 +388,7 @@ weights:
   Laplacian_variance: 0.25
 ```
 
-The score is calculated from normalized metric values:
+分數會先根據 threshold 做 normalization，再依照權重加總。
 
 ```text
 final_score =
@@ -396,27 +398,25 @@ final_score =
   + Laplacian_weight * Laplacian_norm
 ```
 
-The normalized values are computed based on the thresholds.
-
-For metrics where higher is better:
+對於越高越好的指標：
 
 ```text
 score_norm = min(score / threshold, 1.0)
 ```
 
-For metrics where lower is better:
+對於越低越好的指標：
 
 ```text
 score_norm = min(threshold / score, 1.0)
 ```
 
-The final score is mainly used to provide a quick overall quality reference.
+`final_score` 主要用於快速觀察整體影像品質，但主要判斷仍以 `final_pass` 為準。
 
 ---
 
-## Threshold Adjustment
+## Threshold 調整建議
 
-The default thresholds are only initial values.
+目前的 threshold 是初版設定值：
 
 ```yaml
 thresholds:
@@ -426,29 +426,29 @@ thresholds:
   Laplacian_variance: 20.0
 ```
 
-These thresholds should be adjusted after observing the actual score distribution of the target dataset.
+這些 threshold 建議要根據實際資料集的分布進行調整。
 
-A recommended workflow is:
+建議流程如下：
 
-1. Run the evaluation on a batch of images.
-2. Check the CSV or Excel output.
-3. Compare metric results with human judgment.
-4. Adjust thresholds in `config.yaml`.
-5. Run the evaluation again.
-6. Repeat until the thresholds match the expected quality standard.
+1. 先對一批影像進行評估。
+2. 查看 CSV 或 Excel 輸出結果。
+3. 將 metric 分數與人工判斷結果進行比較。
+4. 調整 `config.yaml` 裡面的 threshold。
+5. 重新執行評估。
+6. 重複調整直到結果符合預期品質標準。
 
-For example:
+例如：
 
-- If many acceptable images fail only because of NIQE, the NIQE threshold may need to be relaxed.
-- If blurry images still pass, the Laplacian Variance threshold may need to be increased.
-- If MUSIQ scores are generally low for this dataset, the MUSIQ threshold may need to be adjusted.
-- If BRISQUE is too strict or too loose, its threshold can also be modified.
+- 如果很多肉眼可接受的影像都因為 NIQE 沒過，可能需要放寬 NIQE threshold。
+- 如果模糊影像仍然通過，可能需要提高 Laplacian Variance threshold。
+- 如果資料集的 MUSIQ 分數普遍偏低，可能需要調整 MUSIQ threshold。
+- 如果 BRISQUE 太嚴格或太寬鬆，也可以調整 BRISQUE threshold。
 
 ---
 
-## Supported Image Formats
+## 支援影像格式
 
-The following image formats are supported:
+目前支援以下影像格式：
 
 ```text
 .jpg
@@ -462,61 +462,98 @@ The following image formats are supported:
 
 ---
 
-## Example Workflow
+## 範例執行流程
 
 ```bash
-# 1. Install dependencies
+# 1. 安裝套件
 pip install -r requirements.txt
 
-# 2. Download NIQE and BRISQUE assets
+# 2. 下載 NIQE 和 BRISQUE 需要的模型檔案
 python download_assets.py
 
-# 3. Run evaluation on one image
+# 3. 評估單張影像
 python main.py --config config.yaml --input_path ./data/test.jpg
 
-# 4. Run evaluation on a folder
+# 4. 評估整個資料夾
 python main.py --config config.yaml --input_path ./data/images
 
-# 5. Check detailed logs
+# 5. 查看詳細 log
 cat outputs/logs/run.log
 ```
 
 ---
 
-## Design Notes
+## 設計說明
 
-The project is separated into several parts:
+本專案將程式拆成幾個主要部分：
 
-- `main.py` handles command line arguments and starts the evaluation.
-- `config.yaml` stores user-adjustable settings.
-- `src/evaluator.py` controls the main evaluation process.
-- `src/metrics/` contains the implementation of each metric.
-- `src/utils.py` handles image loading and file collection.
-- `src/logger.py` handles terminal and file logging.
-- `outputs/` stores all evaluation results.
+- `main.py`：處理 command line arguments，並啟動整體評估流程。
+- `config.yaml`：存放使用者可調整的設定，例如 path、threshold、weights。
+- `src/evaluator.py`：負責主要的影像評估流程與結果彙整。
+- `src/metrics/`：存放四個 metric 的實作。
+- `src/utils.py`：處理影像讀取與檔案蒐集。
+- `src/logger.py`：處理 terminal 與 log file 的輸出。
+- `outputs/`：存放所有評估結果。
 
-This structure keeps the code readable and maintainable. It avoids putting everything into one large script, while also avoiding overly fragmented files.
+這樣的架構可以避免所有程式都塞在同一個檔案裡，同時也不會切得太零散，方便後續維護與擴充。
 
 ---
 
-## Summary
+## 關於 `__init__.py`
 
-This repository provides a configurable image quality assessment pipeline for defect image evaluation.
+在 `src/` 和 `src/metrics/` 裡面會看到 `__init__.py`：
 
-For each input image, the program calculates:
+```bash
+src/
+├── __init__.py
+└── metrics/
+    ├── __init__.py
+    ├── musiq.py
+    ├── niqe.py
+    ├── brisque.py
+    └── laplacian.py
+```
+
+這兩個 `__init__.py` 可以是空檔案。
+
+它們的用途是告訴 Python：
+
+```text
+src 是一個 package
+metrics 也是一個 package
+```
+
+這樣在其他程式中就可以正常 import：
+
+```python
+from src.metrics.musiq import MUSIQMetric
+from src.metrics.niqe import NIQEMetric
+from src.metrics.brisque import BRISQUEMetric
+from src.metrics.laplacian import calculate_laplacian_variance
+```
+
+雖然新版 Python 有時候沒有 `__init__.py` 也可以執行，但放著會比較標準，也比較適合整理成 GitHub repo。
+
+---
+
+## 總結
+
+本專案提供一個可設定、可批次執行的瑕疵影像品質評估流程。
+
+對每張輸入影像，程式會計算：
 
 1. MUSIQ
 2. NIQE
 3. BRISQUE
 4. Laplacian Variance
 
-Then it outputs:
+並輸出：
 
-- Pass/fail result for each metric
-- Final pass/fail result
-- Weighted final score
-- CSV result file
-- Excel result file
-- Detailed log file
+- 每個 metric 的 pass / fail 結果
+- 最終 final pass / fail 結果
+- 加權後的 final score
+- CSV 結果檔
+- Excel 結果檔
+- 詳細 log 檔
 
-The main pass/fail decision is based on the four metric thresholds, while the final score is used only as an additional overview reference.
+主要的 pass / fail 判斷會根據四個 metric 的 threshold 決定，而 `final_score` 則提供整體品質的輔助參考。
