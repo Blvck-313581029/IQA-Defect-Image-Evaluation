@@ -20,6 +20,9 @@ class NIQEMetric:
         self.gaussian_window = params["gaussian_window"]
 
     def estimate_aggd_param(self, block):
+        """
+        對輸入 block 擬合 AGGD，回傳 alpha, beta_l, beta_r
+        """
         block = block.flatten()
 
         left_data = block[block < 0]
@@ -42,7 +45,8 @@ class NIQEMetric:
             / ((gammahat ** 2 + 1) ** 2 + 1e-12)
         )
 
-        alpha = GAMMA_RANGE[np.argmin((PREC_GAMMAS - rhatnorm) ** 2)]
+        array_position = np.argmin((PREC_GAMMAS - rhatnorm) ** 2)
+        alpha = GAMMA_RANGE[array_position]
 
         beta_l = left_std * np.sqrt(gamma(1.0 / alpha) / gamma(3.0 / alpha))
         beta_r = right_std * np.sqrt(gamma(1.0 / alpha) / gamma(3.0 / alpha))
@@ -50,17 +54,22 @@ class NIQEMetric:
         return alpha, beta_l, beta_r
 
     def compute_feature(self, block):
+        """
+        從一個 MSCN block 抽出 NIQE 的 18 維 feature
+        """
         feat = []
 
+        # 1. MSCN 本身的 AGGD feature
         alpha, beta_l, beta_r = self.estimate_aggd_param(block)
         feat.append(alpha)
         feat.append((beta_l + beta_r) / 2)
 
+        # 2. 四個方向 pairwise product
         shifts = [
-            (0, 1),
-            (1, 0),
-            (1, 1),
-            (1, -1),
+            (0, 1),    # horizontal
+            (1, 0),    # vertical
+            (1, 1),    # main diagonal
+            (1, -1),   # secondary diagonal
         ]
 
         for shift in shifts:
@@ -80,7 +89,11 @@ class NIQEMetric:
         return feat
 
     def calculate_mscn(self, img):
+        """
+        計算 MSCN coefficient
+        """
         mu = convolve(img, self.gaussian_window, mode="nearest")
+
         sigma = np.sqrt(
             np.abs(
                 convolve(img ** 2, self.gaussian_window, mode="nearest")
@@ -91,6 +104,10 @@ class NIQEMetric:
         return (img - mu) / (sigma + 1)
 
     def calculate(self, img_bgr):
+        """
+        輸入 BGR image
+        回傳 NIQE score，越低越好
+        """
         img = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY).astype(np.float64)
 
         block_size_h = 96
@@ -101,8 +118,12 @@ class NIQEMetric:
         num_block_w = w // block_size_w
 
         if num_block_h == 0 or num_block_w == 0:
-            raise ValueError("Image is too small for NIQE block size 96x96.")
+            raise ValueError(
+                "Image is too small for NIQE block size 96x96. "
+                "Please use a larger image."
+            )
 
+        # 讓影像大小可以被 block size 整除
         img = img[:num_block_h * block_size_h, :num_block_w * block_size_w]
 
         distparam = []
@@ -139,18 +160,42 @@ class NIQEMetric:
                         block_index = idx_w * num_block_h + idx_h
                         distparam[block_index].extend(feat)
 
-        distparam = np.array(distparam)
+        distparam = np.array(distparam, dtype=np.float64)
 
-        mu_distparam = np.nanmean(distparam, axis=0)
+        # 移除 NaN / Inf 的 feature row，避免 covariance 計算出問題
+        valid_mask = np.isfinite(distparam).all(axis=1)
+        valid_distparam = distparam[valid_mask]
 
-        valid_distparam = distparam[~np.isnan(distparam).any(axis=1)]
+        if valid_distparam.shape[0] < 2:
+            raise ValueError(
+                "Not enough valid NIQE blocks to compute covariance. "
+                "Please use a larger image or check image quality."
+            )
+
+        # 測試影像的 feature 平均與 covariance
+        mu_distparam = np.nanmean(valid_distparam, axis=0)
         cov_distparam = np.cov(valid_distparam, rowvar=False)
 
+        # 統一 shape，避免 diff 變成 (1, 36)，導致 quality 是 (1, 1)
+        mu_pris = self.mu_pris_param.reshape(-1)
+        mu_distparam = mu_distparam.reshape(-1)
+
+        cov_pris = self.cov_pris_param
+
+        # Mahalanobis distance
         invcov_param = np.linalg.pinv(
-            (self.cov_pris_param + cov_distparam) / 2
+            (cov_pris + cov_distparam) / 2
         )
 
-        diff = self.mu_pris_param - mu_distparam
-        quality = np.sqrt(np.matmul(np.matmul(diff, invcov_param), diff.T))
+        diff = mu_pris - mu_distparam
 
-        return float(quality)
+        quality = np.sqrt(
+            np.matmul(
+                np.matmul(diff, invcov_param),
+                diff.T
+            )
+        )
+
+        # quality 有時候會是 numpy scalar，有時候會是 array
+        # 用 squeeze() 保險轉成單一數值
+        return float(np.asarray(quality).squeeze())
