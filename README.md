@@ -1,5 +1,6 @@
 # IQA Defect Image Evaluation
-[![Wiki](https://deepwiki.com/Blvck-313581029/IQA-Defect-Image-Evaluation) 
+[Wiki](https://deepwiki.com/Blvck-313581029/IQA-Defect-Image-Evaluation)
+
 本專案是一個用於**瑕疵影像品質評估**的工具。
 
 主要目標是針對輸入影像，透過多個 no-reference image quality assessment 指標，判斷該影像是否符合基本品質需求。目前支援四個指標：
